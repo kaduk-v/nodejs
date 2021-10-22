@@ -1,0 +1,89 @@
+version: '3'
+
+services:
+    api:
+        build:
+            context: ./
+            dockerfile: docker/api.dockerfile
+        container_name: app-api
+        env_file:
+            - .env
+        restart: always
+        volumes:
+            - ./services/api:/app
+            - api_node_modules:/app/node_modules
+        working_dir: /app
+        ports:
+            - "3000:3000"
+        networks:
+            - app-network
+
+    cache:
+        build:
+            context: ./
+            dockerfile: docker/cache.dockerfile
+        container_name: app-cache
+        env_file: .env
+        restart: always
+        volumes:
+            - ./services/cache:/app
+            - cache_node_modules:/app/node_modules
+        working_dir: /app
+        ports:
+            - "4000:4000"
+        networks:
+            - app-network
+
+    db:
+        build:
+            context: ./
+            dockerfile: docker/db.dockerfile
+        container_name: app-db
+        env_file: .env
+        restart: always
+        volumes:
+            - ./services/db:/app
+            - db_node_modules:/app/node_modules
+        working_dir: /app
+        ports:
+            - "5000:5000"
+        networks:
+            - app-network
+
+    mongodb:
+        image: mongo
+        container_name: app-mongodb
+        restart: always
+        environment:
+            MONGO_INITDB_DATABASE: mongo_db
+        volumes:
+            - mongodb_data:/data/db
+        ports:
+            - "27017:27017"
+        networks:
+            - app-network
+
+    rabbitmq:
+        image: rabbitmq:3-management-alpine
+        container_name: rabbitmq
+        restart: always
+        ports:
+            - "5672:5672"
+            - "15672:15672"
+        volumes:
+            - rabbitmq_data:/var/lib/rabbitmq
+            - rabbitmq_log:/var/log/rabbitmq
+        networks:
+            - app-network
+
+volumes:
+    api_node_modules:
+    cache_node_modules:
+    db_node_modules:
+    mongodb_data:
+    rabbitmq_data:
+    rabbitmq_log:
+
+networks:
+    app-network:
+        driver: bridge
