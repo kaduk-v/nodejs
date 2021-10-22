@@ -3,6 +3,11 @@
 make init
 ```
 
+Init database data:
+```bash
+make db-data-init
+```
+
 ### Docker control:
 Run docker:
 ```bash
